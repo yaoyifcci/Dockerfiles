@@ -1,8 +1,8 @@
 FROM yaoyi/ubuntu:14.04
-ENV LANG "en_US.UTF-8"
+#ENV LANG "en_US.UTF-8"
 
 ### install dependen packages
-RUN apt-get install -y wget curl gcc make libxml2-dev libcurl3-dev libgd-dev libgd-dev
+RUN apt-get install -y wget curl gcc make libxml2-dev libcurl3-dev libgd-dev libgd-dev rsync openssl libssl-dev libmcrypt-dev libzip-dev
 RUN apt-get install -y libmemcached-dev autoconf
 RUN useradd www
 
@@ -10,7 +10,7 @@ RUN useradd www
 RUN wget -O /tmp/phpsrc.tar.gz http://cn2.php.net/distributions/php-5.4.45.tar.gz
 RUN tar -xvf /tmp/phpsrc.tar.gz -C /usr/local/src/
 RUN rm /tmp/phpsrc.tar.gz
-RUN /usr/local/src/php-5.4.45/configure --prefix=/usr/local/ --with-config-file-path=/etc/ --with-curl --enable-fpm --enable-mysqlnd --with-mysql --with-mysqli --with-pdo-mysql --enable-mbstring --with-fpm-user=www --with-fpm-group=www
+RUN /usr/local/src/php-5.4.45/configure --prefix=/usr/local/ --with-config-file-path=/etc/ --with-curl --enable-fpm --enable-mysqlnd --with-mysql --with-mysqli --with-pdo-mysql --enable-mbstring --enable-bcmath --enable-ftp --with-gettext --with-mcrypt --enable-pcntl --enable-shmop --enable-sockets --enable-zip --with-fpm-user=www --with-fpm-group=www
 RUN cp /usr/local/src/php-5.4.45/php.ini-production /etc/php.ini
 RUN cd /usr/local/src/php-5.4.45/
 RUN make -j `cat /proc/cpuinfo |grep 'core id'|wc -l`
@@ -62,7 +62,6 @@ RUN cd /tmp/ && tar -xvf php-amqp.tgz -C /usr/local/src/php-5.4.45/ext/
 RUN rm /tmp/php-amqp.tgz
 RUN cd /usr/local/src/php-5.4.45/ext/amqp-1.6.1/ && phpize && ./configure && make && make install
 RUN echo "extension=amqp.so">>/etc/php.ini
-
 
 ### set php.ini
 RUN sed -i "s/^;date.timezone =/date.timezone = Asia\/Shanghai/" /etc/php.ini
