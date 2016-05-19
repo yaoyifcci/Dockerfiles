@@ -1,9 +1,14 @@
 FROM yaoyi/ubuntu:14.04
 RUN wget -O /tmp/nginx.tar.gz http://nginx.org/download/nginx-1.8.0.tar.gz
-RUN cd /tmp/ && tar -xvf nginx.tar.gz -C /usr/local/src/
-RUN rm /tmp/nginx.tar.gz
-RUN apt-get install -y gcc make libpcre3-dev zlib1g-dev
-RUN cd /usr/local/src/nginx-1.8.0/ && ./configure --prefix=/usr/local/  && make && make install
-RUN sed -i "1adaemon off;" /usr/local/conf/nginx.conf
+WORKDIR /tmp/
+RUN mkdir /src/
+RUN tar -xvf nginx.tar.gz -C /src/ && rm /tmp/nginx.tar.gz
+RUN apt-get update && apt-get install -y gcc make libpcre3-dev zlib1g-dev libssl-dev openssl
+WORKDIR /src/nginx-1.8.0/
+RUN ./configure --prefix=/nginx/ --with-http_ssl_module  && make && make install
+COPY nginx.conf /nginx/conf/nginx.conf
+VOLUME /nginx/conf/server.d/
+VOLUME /nginx/logs/
 EXPOSE 80
-CMD /usr/local/sbin/nginx
+EXPOSE 443
+ENTRYPOINT /nginx/sbin/nginx
